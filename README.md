@@ -1,4 +1,4 @@
-# leetcode
+# Leetcode
 1. Tree
     
 3. BST
