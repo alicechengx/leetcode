@@ -1,0 +1,48 @@
+二分基本模版代码如下：
+
+public int rawBinarySearch(int[] nums, int target) {
+    int left = 0, right = nums.length - 1, mid = 0;
+    while (left <= right) {//注意这里是小于等于
+        mid = left + (right - left) / 2;
+        if (nums[mid] == target) {
+            return mid;
+        }
+        if (nums[mid] < target) {
+            left = mid + 1; //➕1
+        } else {
+            right = mid - 1; //➖1
+        }
+    }
+    return -1;
+}
+
+
+二分万能模版如下：
+
+public int binarySearch(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + ((right - left) >> 1);
+        if (nums[mid] < target) {
+            left = mid;
+        } else { // 注意这里的else 包含了 nums[mid] > target 和 nums[mid] == target 的情况
+            right = mid;
+        }
+    }
+    // 退出循环的时候需要判断
+    if (nums[left] == target) return left;
+    else if (nums[right] == target) return right;
+    return -1; // 没有找到
+}
+
+与常见的二分代码主要有以下几点区别：
+
+while 循环的判断条件固定为 left + 1 < right
+缩小边界时统一使用 left = mid; 和 right = mid; ，不用去考虑 mid + 1 或 mid - 1
+退出循环时，需要针对 nums[left] 和 nums[right] 做判断
+
+甜姨的解释：万能模板其实就是不管啥问题，都通过 while 循环把数据区间逼近到 [left, right]（其中，left + 1 == right）两个值，所以出来循环后只要判断一下 left 和 right 就行了。
+首先我们的循环退出判断条件为 left + 1 < right，这为一个区间，这是前提，也是最终退出循环后做判断的基础；
+其次，我们在循环中更新 left 或者 right 时不用再考虑 +1 、-1 等情况，因为 +1、-1 的目的是为了保证能够顺利退出循环而不会造成死循环。由于我们循环退出条件为 left + 1 < right，有别于基础二分法的 left <= right，这里我们可以想象基础二分法会将数据区间逼近到一个数，即判断条件 nums[mid] == target，而万能模版是逼近的一个区间，由于我们每次都会更新 left 或者 right ，所以最终总会到达一个区间。
+为什么退出循环时要做判断？举个例子，比如在数组 {1, 2, 3, 4, 5, 6, 7} 中寻找 1 的时候，按照万能模版的代码，退出循环的时候到达的区间是 [0,1]，即 nums[left] = 1 nums[right] = 2，而此时我们要找的是 nums[left]；还是数组 {1, 2, 3, 4, 5, 6, 7}，这次我们要找2，万能模版退出循环到达的区间还是 [0,1]，即 nums[left] = 1 nums[right] = 2，只不过这次我们要找的是 nums[right]。从这个简单的例子中就可以看出，虽然能够保证最终能够推出循环，且我们要找的目标值在 [left,right] ，但是到底是区间的第一个元素还是第二个元素，我们无法保证，需要在退出循环后自行验证。这样，我们就将整个数组找目标值的问题转换为在两个数之间找目标值，这样是不是 so easy 呢！
+
