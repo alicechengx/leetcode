@@ -43,6 +43,118 @@ while 循环的判断条件固定为 left + 1 < right
 
 甜姨的解释：万能模板其实就是不管啥问题，都通过 while 循环把数据区间逼近到 [left, right]（其中，left + 1 == right）两个值，所以出来循环后只要判断一下 left 和 right 就行了。
 首先我们的循环退出判断条件为 left + 1 < right，这为一个区间，这是前提，也是最终退出循环后做判断的基础；
-其次，我们在循环中更新 left 或者 right 时不用再考虑 +1 、-1 等情况，因为 +1、-1 的目的是为了保证能够顺利退出循环而不会造成死循环。由于我们循环退出条件为 left + 1 < right，有别于基础二分法的 left <= right，这里我们可以想象基础二分法会将数据区间逼近到一个数，即判断条件 nums[mid] == target，而万能模版是逼近的一个区间，由于我们每次都会更新 left 或者 right ，所以最终总会到达一个区间。
+其次，我们在循环中更新 left 或者 right 时不用再考虑 +1 、-1 等情况，因为 +1、-1 的目的是为了保证能够顺利退出循环而不会造成死循环。
+由于我们循环退出条件为 left + 1 < right，有别于基础二分法的 left <= right，这里我们可以想象基础二分法会将数据区间逼近到一个数，即判断条件 nums[mid] == target，而万能模版是逼近的一个区间，由于我们每次都会更新 left 或者 right ，所以最终总会到达一个区间。
+
 为什么退出循环时要做判断？举个例子，比如在数组 {1, 2, 3, 4, 5, 6, 7} 中寻找 1 的时候，按照万能模版的代码，退出循环的时候到达的区间是 [0,1]，即 nums[left] = 1 nums[right] = 2，而此时我们要找的是 nums[left]；还是数组 {1, 2, 3, 4, 5, 6, 7}，这次我们要找2，万能模版退出循环到达的区间还是 [0,1]，即 nums[left] = 1 nums[right] = 2，只不过这次我们要找的是 nums[right]。从这个简单的例子中就可以看出，虽然能够保证最终能够推出循环，且我们要找的目标值在 [left,right] ，但是到底是区间的第一个元素还是第二个元素，我们无法保证，需要在退出循环后自行验证。这样，我们就将整个数组找目标值的问题转换为在两个数之间找目标值，这样是不是 so easy 呢！
 
+3 万能二分模版的基本应用
+3.1 寻找最左目标值的下标
+要想找到最左（第一个）满足条件的值，我们其实是需要尽可能地往左边去寻找，也就是区间右边界尽可能地收缩，特别是当我们找到一个满足条件的值时。算法整体步骤如下：
+
+如果当前值（mid 处的值）小于目标值，往右继续寻找，收缩左边界（left = mid）；
+如果当前值（mid 处的值）等于目标值，因为要找的是第一个满足条件的值，所以需要尽可能往左边去寻找，因此需要收缩右边界（right = mid）例如在 [1,2,3,3,3,4,5] 中寻找第一个 3 的下标：我们首先得到的是下标为 3 的那个 3，但是我们想要找的下标为 2 的那个 3，因此继续往左边去寻找，收缩右边界（right = mid）
+如果当前值（mid 处的值）大于目标值，往左继续寻找，收缩右边界（right = mid）
+private static int getFirstEquals(int[] nums, int target) {
+    int length = nums.length;
+    int left = 0, right = length - 1;
+    while (left + 1 < right) {
+        int mid = left + ((right - left) >> 1);
+        if (nums[mid] >= target) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    if (nums[left] == target) return left;
+    else if (nums[right] == target) return right;
+    return -1; // 返回 -1 表示在数组中没找到符合条件的值
+}
+
+3.2 寻找最右目标值的下标
+同理，我们在寻找满足条件的最右值时，应该尽可能往右边去寻找，也就是左边界尽可能地收缩。算法整体步骤如下：
+
+如果当前值（mid 处的值）小于目标值，往右继续寻找，收缩左边界（left = mid）；
+如果当前值（mid 处的值）等于目标值，因为要寻找的最后一个满足条件的值，所以需要尽可能地往右去寻找，因此此时需要收缩左边界（left = mid）
+如果当前值（mid 处的值）大于目标值，往左继续寻找，收缩右边界（right = mid）
+private static int getLastEquals(int[] nums, int target) {
+    int length = nums.length;
+    int left = 0, right = length - 1;
+    while (left + 1 < right) {
+        int mid = left + ((right - left) >> 1);
+        if (nums[mid] <= target) {
+            left = mid;
+        } else {
+            right = mid;
+        }
+    }
+    if (nums[right] == target) return right;
+    else if (nums[left] == target) return left;
+    return -1; // 返回 -1 表示在数组中没找到符合条件的值
+}
+
+总结：不管是找最左还是最右，当 mid 处的值大于或小于 target 时，操作是一致的，小于往右走，大于往左走，只有等于的时候有些许不同。当等于的时候，具体往左还是往右看是找最左还是最右，找最左就继续往左走，找最右就继续往右走
+
+3.3 拓展
+类似地，我们可以求出第一个小于 target 的下标、第一个大于 target 的下标、最后一个小于 target的下标 、最后一个大于 target （无意义）。其实从下表中我们可以看出，除了最后求最后一个大于，其它情况中小于时均是往右走（收缩左边界），大于时均是往左走（收缩右边界），只有在等于的时候判断是往左还是往右走即可。而等于的时候我们可以根据“贪心”的思想确定是该往左还是往右。
+
+求第一个小于
+public int getFirstSmaller(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + ((right - left) >> 1);
+        if (nums[mid] >= target) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    // 退出循环的时候需要判断
+    if (nums[left] < target) return left;
+    else if (nums[right] < target) return right;
+    return -1; // 没有找到
+}
+
+求第一个大于
+public int getFirstBigger(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + ((right - left) >> 1);
+        if (nums[mid] <= target) {
+            left = mid;
+        } else {
+            right = mid;
+        }
+    }
+    // 退出循环的时候需要判断
+    if (nums[left] > target) return left;
+    else if (nums[right] > target) return right;
+    return -1; // 没有找到
+}
+
+求最后一个小于
+public int getLastSmaller(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left + 1 < right) {
+        int mid = left + ((right - left) >> 1);
+        if (nums[mid] >= target) {
+            right = mid;
+        } else {
+            left = mid;
+        }
+    }
+    // 退出循环的时候需要判断
+    if (nums[right] < target) return right;
+    else if (nums[left] < target) return left;
+    return -1; // 没有找到
+}
+
+求最后一个大于 (无意义)
+public int getLastBigger(int[] nums, int target) {
+    int right = nums.length - 1;
+    if (nums[right] > target) return right;
+    return -1;
+}
+
+上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/chuangshangbeidong/article/details/122492209
