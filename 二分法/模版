@@ -97,7 +97,7 @@ private static int getLastEquals(int[] nums, int target) {
 
 3.3 拓展
 类似地，我们可以求出第一个小于 target 的下标、第一个大于 target 的下标、最后一个小于 target的下标 、最后一个大于 target （无意义）。其实从下表中我们可以看出，除了最后求最后一个大于，其它情况中小于时均是往右走（收缩左边界），大于时均是往左走（收缩右边界），只有在等于的时候判断是往左还是往右走即可。而等于的时候我们可以根据“贪心”的思想确定是该往左还是往右。
-![This is an image](https://github.com/alicechengx/leetcode/issues/1#issue-1174411044)
+![This is an image](/images/3b67260ef6fa44a285b02774747f84fe.png)
 
 求第一个小于
 public int getFirstSmaller(int[] nums, int target) {
